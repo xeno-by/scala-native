@@ -205,7 +205,7 @@ object ScalaNativePluginInternal {
         classpath
           .map(entry => entry.data.abs)
           .collectFirst {
-            case p if p.contains("scala-native") && p.contains("nativelib") =>
+            case p if p.contains("xenoby") && p.contains("nativelib") =>
               file(p)
           }
           .get
