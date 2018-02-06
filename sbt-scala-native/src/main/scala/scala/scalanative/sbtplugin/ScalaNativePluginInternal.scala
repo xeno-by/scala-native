@@ -70,14 +70,14 @@ object ScalaNativePluginInternal {
 
   lazy val scalaNativeDependencySettings: Seq[Setting[_]] = Seq(
     libraryDependencies ++= Seq(
-      "org.scala-native" %%% "nativelib"      % nativeVersion,
-      "org.scala-native" %%% "javalib"        % nativeVersion,
-      "org.scala-native" %%% "auxlib"         % nativeVersion,
-      "org.scala-native" %%% "scalalib"       % nativeVersion,
-      "org.scala-native" %%% "test-interface" % nativeVersion % Test
+      "com.github.xenoby" %%% "nativelib"      % nativeVersion,
+      "com.github.xenoby" %%% "javalib"        % nativeVersion,
+      "com.github.xenoby" %%% "auxlib"         % nativeVersion,
+      "com.github.xenoby" %%% "scalalib"       % nativeVersion,
+      "com.github.xenoby" %%% "test-interface" % nativeVersion % Test
     ),
     addCompilerPlugin(
-      "org.scala-native" % "nscplugin" % nativeVersion cross CrossVersion.full)
+      "com.github.xenoby" % "nscplugin" % nativeVersion cross CrossVersion.full)
   )
 
   lazy val scalaNativeBaseSettings: Seq[Setting[_]] = Seq(

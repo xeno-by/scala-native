@@ -22,7 +22,6 @@ libraryDependencies ++= Seq(
 
 addSbtPlugin("org.scala-native"  % "sbt-crossproject" % "0.2.2")
 addSbtPlugin("com.eed3si9n"      % "sbt-dirty-money"  % "0.1.0")
-addSbtPlugin("org.foundweekends" % "sbt-bintray"      % "0.5.2")
 addSbtPlugin("com.jsuereth"      % "sbt-pgp"          % "1.0.0")
 
 scalacOptions ++= Seq(

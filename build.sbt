@@ -12,7 +12,7 @@ val libScalaVersion       = "2.11.12"
 val libCrossScalaVersions = Seq("2.11.8", "2.11.11", libScalaVersion)
 
 lazy val baseSettings = Seq(
-  organization := "org.scala-native",
+  organization := "com.github.xenoby",
   version := nativeVersion
 )
 
@@ -71,22 +71,12 @@ lazy val setUpTestingCompiler = Def.task {
     ((crossTarget in Compile).value / "nativelib").getAbsolutePath
 }
 
-// to publish plugin (we only need to do this once, it's already done!)
-// follow: http://www.scala-sbt.org/0.13/docs/Bintray-For-Plugins.html
-// then add a new package
-// name: sbt-scala-native, license: BSD-like, version control: git@github.com:scala-native/scala-native.git
-// to be available without a resolver
-// follow: http://www.scala-sbt.org/0.13/docs/Bintray-For-Plugins.html#Linking+your+package+to+the+sbt+organization
-lazy val bintrayPublishSettings = Seq(
-  bintrayRepository := "sbt-plugins",
-  bintrayOrganization := Some("scala-native")
-) ++ publishSettings
-
 lazy val mavenPublishSettings = Seq(
   publishMavenStyle := true,
   pomIncludeRepository := { x =>
     false
   },
+  resolvers += "Prerelease builds of Scala Native" at "https://oss.sonatype.org/content/repositories/staging",
   publishTo := {
     val nexus = "https://oss.sonatype.org/"
     if (version.value.trim.endsWith("SNAPSHOT"))
@@ -115,13 +105,21 @@ lazy val mavenPublishSettings = Seq(
     }
   }.value,
   credentials ++= {
-    for {
-      realm    <- sys.env.get("MAVEN_REALM")
-      domain   <- sys.env.get("MAVEN_DOMAIN")
-      user     <- sys.env.get("MAVEN_USER")
-      password <- sys.env.get("MAVEN_PASSWORD")
-    } yield {
-      Credentials(realm, domain, user, password)
+    val credentialsFile = {
+      val adhocRepoCredentials = sys.props("scalanative.repository.credentials")
+      if (adhocRepoCredentials != null) new File(adhocRepoCredentials) else null
+    }
+    if (credentialsFile != null) {
+      Some(new FileCredentials(credentialsFile))
+    } else {
+      for {
+        realm    <- sys.env.get("MAVEN_REALM")
+        domain   <- sys.env.get("MAVEN_DOMAIN")
+        user     <- sys.env.get("MAVEN_USER")
+        password <- sys.env.get("MAVEN_PASSWORD")
+      } yield {
+        Credentials(realm, domain, user, password)
+      }
     }
   }.toSeq
 ) ++ publishSettings
@@ -264,7 +262,7 @@ lazy val nscplugin =
 
 lazy val sbtPluginSettings =
   toolSettings ++
-    bintrayPublishSettings ++
+    publishSettings ++
     ScriptedPlugin.scriptedSettings ++
     Seq(
       sbtPlugin := true,
@@ -279,6 +277,7 @@ lazy val sbtScalaNative =
   project
     .in(file("sbt-scala-native"))
     .settings(sbtPluginSettings)
+    .settings(mavenPublishSettings)
     .settings(
       crossScalaVersions := libCrossScalaVersions,
       // fixed in https://github.com/sbt/sbt/pull/3397 (for sbt 0.13.17)
@@ -422,7 +421,7 @@ lazy val tests =
     .settings(
       // nativeOptimizerReporter := OptimizerReporter.toDirectory(
       //   crossTarget.value),
-      libraryDependencies += "org.scala-native" %%% "test-interface" % nativeVersion,
+      libraryDependencies += "com.github.xenoby" %%% "test-interface" % nativeVersion,
       testFrameworks += new TestFramework("tests.NativeFramework"),
       envVars in (Test, test) ++= Map(
         "USER"                           -> "scala-native",
@@ -506,8 +505,8 @@ lazy val testInterface =
     .in(file("test-interface"))
     .settings(
       name := "test-interface",
-      libraryDependencies += "org.scala-sbt"    % "test-interface"   % "1.0",
-      libraryDependencies -= "org.scala-native" %%% "test-interface" % version.value % Test
+      libraryDependencies += "org.scala-sbt"     % "test-interface"   % "1.0",
+      libraryDependencies -= "com.github.xenoby" %%% "test-interface" % version.value % Test
     )
     .enablePlugins(ScalaNativePlugin)
     .dependsOn(testInterfaceSerialization)
@@ -520,7 +519,7 @@ lazy val testInterfaceSerialization =
     .in(file("test-interface-serialization"))
     .settings(
       name := "test-interface-serialization",
-      libraryDependencies -= "org.scala-native" %%% "test-interface" % version.value % Test
+      libraryDependencies -= "com.github.xenoby" %%% "test-interface" % version.value % Test
     )
     .dependsOn(testInterfaceSbtDefs)
     .enablePlugins(ScalaNativePlugin)
@@ -533,6 +532,6 @@ lazy val testInterfaceSbtDefs =
     .in(file("test-interface-sbt-defs"))
     .settings(
       name := "test-interface-sbt-defs",
-      libraryDependencies -= "org.scala-native" %%% "test-interface" % version.value % Test
+      libraryDependencies -= "com.github.xenoby" %%% "test-interface" % version.value % Test
     )
     .enablePlugins(ScalaNativePlugin)
