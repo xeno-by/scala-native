@@ -21,6 +21,7 @@ addSbtPlugin("com.eed3si9n"       % "sbt-dirty-money"   % "0.1.0")
 addSbtPlugin("org.foundweekends"  % "sbt-bintray"       % "0.5.2")
 addSbtPlugin("com.jsuereth"       % "sbt-pgp"           % "1.0.0")
 addSbtPlugin("com.typesafe"       % "sbt-mima-plugin"   % "0.1.14")
+addSbtPlugin("io.get-coursier"    % "sbt-coursier"      % "1.0.1")
 
 scalacOptions ++= Seq(
   "-deprecation",
